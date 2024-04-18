@@ -1,4 +1,5 @@
 #include<iostream>
+#include <conio.h>
 using namespace std;
 
 #define MIN_TANK_VOLUME 20
@@ -44,6 +45,10 @@ public:
 		//this->fuel_level = 0;
 		cout << "Tank is ready " << this << endl;
 	}
+	~Tank()
+	{
+		cout << "Tank is over: " << this << endl;
+	}
 	void info()const
 	{
 		cout << "Tank volume: " << VOLUME << " liters.\n";
@@ -51,9 +56,123 @@ public:
 	}
 };
 
+#define MIN_ENGINE_CONSUMPTION 3
+#define MAX_ENGINE_CONSUMPTION 30
+class Engine
+{
+	const double CONSUMPTION;
+	double consumption_per_second;
+	bool is_started;
+public:
+	double get_consumption()const
+	{
+		return CONSUMPTION;
+	}
+	double get_consumption_per_second()const
+	{
+		return consumption_per_second;
+	}
+	Engine(double consumption)
+		:CONSUMPTION
+		(
+			consumption < MIN_ENGINE_CONSUMPTION ? MIN_ENGINE_CONSUMPTION :
+			consumption > MAX_ENGINE_CONSUMPTION ? MAX_ENGINE_CONSUMPTION :
+			consumption
+		),
+		consumption_per_second(CONSUMPTION * 3e-5),
+		is_started(false)
+	{
+		//consumption_per_second = CONSUMPTION * 3e-5;
+		cout << "Engine is ready: " << this << endl;
+	}
+	~Engine()
+	{
+		cout << "Engine is over: " << this << endl;
+	}
+	void start()
+	{
+		is_started = true;
+	}
+	void stop()
+	{
+		is_started = false;
+	}
+	bool started()const
+	{
+		return is_started;
+	}
+	void info()const
+	{
+		cout << "Consumption: " << CONSUMPTION << " liters/100km" << endl;
+		cout << "Consumption: " << consumption_per_second << " liters/sec" << endl;
+		cout << "Engine is " << (is_started ? "started" : "stopped") << endl;
+	}
+};
+
+class Car
+{
+	Engine engine;
+	Tank tank;
+	bool driver_inside;
+public:
+	Car(int consumption = 10, int volume = 60) :engine(consumption), tank(volume), driver_inside(false)
+	{
+		cout << "Your car is ready to go" << endl;
+	}
+	~Car()
+	{
+		cout << "Your car is over" << endl;
+	}
+	void get_in()
+	{
+		driver_inside = true;
+		panel();
+	}
+	void get_out()
+	{
+		driver_inside = false;
+		cout << "Out of the car" << endl;
+	}
+	void control()
+	{
+		char key;
+		do
+		{
+			key = _getch();// глобальная функция
+			switch (key)
+			{
+			case 13: driver_inside ? get_out() : get_in(); break;
+				break;
+			}
+		} while (key != 27);
+	}
+	void panel()const
+	{
+		while (driver_inside)
+		{
+			system("CLS");//очитска экрана
+			cout << "Fuel level:\t" << tank.get_fuel_level() << " liters.\n";
+			cout << "Engine is " << (engine.started() ? "started" : "stopped") << endl;
+		}
+	}
+	void info()const
+	{
+		engine.info();
+		tank.info();
+	}
+};
+
+//#define TANK_CHECK
+//#ddefine (Определитель)
+//директива #define создаёт макроопределение(макрос)
+//#define ENGINE 
+
 void main()
 {
 	setlocale(LC_ALL, "");	
+
+#if defined TANK_CHECK
+	//если определенно TANK_CHECK,  то нижеследующей код до директивы #endif будет виден компилятору.
 	Tank tank(85);
 	int fuel;
 	do
@@ -61,6 +180,15 @@ void main()
 		cout << "Введите объем топлива: "; cin >> fuel;
 		tank.fill(fuel);
 		tank.info();
-	} while (fuel > 0);
-	
+	} while (fuel > 0);	
+#endif // TANK_CHECK
+
+#ifdef ENGINE
+	Engine engine(10);
+		engine.info();
+#endif // ENGINE
+
+	Car bmv;
+	bmv.info();
+	bmv.control();
 }
